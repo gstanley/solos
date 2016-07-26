@@ -1,3 +1,6 @@
+catalog = {}
+WORK = "~/temp/work"
+
 # setup wrapper targets
 # global
 $x = 23
@@ -15,6 +18,14 @@ $x = 23
 # runtime environment
 
 # sensors
+# file
+File.read(?)
 
 # client code (to be wrapped)
 #   with metadata
+# file
+f = File.open("#$WORK/test1.txt", "w")
+f.puts("hello")
+f.close
+
+# notes
