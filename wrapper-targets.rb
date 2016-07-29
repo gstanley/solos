@@ -16,10 +16,11 @@ $x = 23
 # process
 # system command
 # runtime environment
+# database
 
 # sensors
 # file
-File.read(?)
+File.read("#$WORK/test1.txt")
 
 # client code (to be wrapped)
 #   with metadata

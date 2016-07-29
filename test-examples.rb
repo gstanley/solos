@@ -4,4 +4,12 @@
 
 require "test/unit"
 
+class TestExamples < Test::Unit::TestCase
+  test "expression" do
+    assert_equal 2, 1 + 1
+  end
 
+  test "method call" do
+    assert_equal 0, Math.sin(0)
+  end
+end
