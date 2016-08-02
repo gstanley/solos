@@ -1,5 +1,7 @@
 # sieve of Eratosthenes
-max = Integer(ARGV.shift || 100)
+source: max = Integer(ARGV.shift || 100)
+deps:
+
 sieve = []
 for i in 2 .. max
   sieve[i] = i
