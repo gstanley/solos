@@ -10,6 +10,7 @@
 - src: end
 - src: ""
 - src: for i in 2 .. Math.sqrt(max)
+  line: 10
 - src:   next unless sieve[i]
 - src:   (i*i).step(max, i) do |j|
 - src:     sieve[j] = nil
