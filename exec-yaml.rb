@@ -4,3 +4,15 @@ def load_yaml_file(name)
   YAML.load(File.read(name))
 end
 
+def merge_defaults(source)
+  default = {}
+  source.map do |elem|
+    if elem["def"]
+      default = elem["def"]
+      elem
+    else
+      default.merge(elem)
+    end
+  end
+end
+
