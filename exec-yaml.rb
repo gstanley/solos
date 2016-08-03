@@ -16,3 +16,16 @@ def merge_defaults(source)
   end
 end
 
+def show_source(source, line_numbers)
+  line_number = 1
+  source.each do |elem|
+    if elem["src"]
+      if line_numbers
+        print "#{line_number}: "
+        line_number += 1
+      end
+      puts elem["src"]
+    end
+  end
+end
+

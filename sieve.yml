@@ -5,11 +5,10 @@
 - src: max = Integer(ARGV.shift || 100)
   deps:
 - src: sieve = []
-  lang: test
 - src: for i in 2 .. max
 - src:   sieve[i] = i
 - src: end
-- src: 
+- src: ""
 - src: for i in 2 .. Math.sqrt(max)
 - src:   next unless sieve[i]
 - src:   (i*i).step(max, i) do |j|
