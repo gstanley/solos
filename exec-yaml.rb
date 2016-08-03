@@ -54,14 +54,9 @@ def show_gen_source(source)
   end
 end
 
-#def exec_line(source, line)
-#  line_number = 1
-#  source.each do |elem|
-#    if elem["src"]
-#      if line_numbers
-#        line_number += 1
-#      end
-#    end
-#  end
-#end
+# dependent on populate_line_numbers
+def exec_line(source, line)
+  elem = source.find {|e| e["line"] == line}
+  eval elem["src"]
+end
 

@@ -2,6 +2,7 @@
     lang: ruby
     file: sieve.rb
 - src: "# sieve of Eratosthenes"
+- src: puts "print this"
 - src: max = Integer(ARGV.shift || 100)
   deps:
 - src: sieve = []
