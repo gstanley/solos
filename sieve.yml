@@ -5,6 +5,10 @@
 - src: puts "print this"
 - src: max = Integer(ARGV.shift || 100)
   deps:
+  - ARGV
+  - Integer
+  effs:
+  - max
 - src: sieve = []
 - src: for i in 2 .. max
 - src:   sieve[i] = i
