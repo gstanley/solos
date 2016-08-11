@@ -1,5 +1,8 @@
+require "fileutils"
+
 catalog = {}
 WORK = "~/temp/work"
+FileUtils.mkdir_p WORK
 
 # setup wrapper targets
 # global
@@ -19,6 +22,8 @@ $x = 23
 # database
 
 # sensors
+# global
+$x
 # file
 File.read("#$WORK/test1.txt")
 
