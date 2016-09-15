@@ -1,0 +1,23 @@
+* lex_strterm
+- lex_strterm == 0
+** nd_type(lex_strterm) == NODE_HEREDOC
+** nd_type(lex_strterm) != NODE_HEREDOC
+* !lex_strterm
+- command_start == TRUE
+- lex_state == 1
+
+static inline int
+parser_nextc(struct parser_params *parser)
+{
+    int c;
+
+    if (UNLIKELY(lex_p == lex_pend)) {
+	if (parser_nextline(parser)) return -1;
+    }
+    c = (unsigned char)*lex_p++;
+    if (UNLIKELY(c == '\r')) {
+	c = parser_cr(parser, c);
+    }
+
+    return c;
+}
