@@ -1,0 +1,7 @@
+* Examples from [[https://sites.google.com/a/campioncollege.com/it_eveningschoool/problem-solving-and-programming/desk-check-guide][Desk Check Guide]]
+** Example 1
+- <input> -> price
+- <input> -> discountPercent
+- price * discountPercent / 100 -> discount
+- price - discount -> discountPrice
+- discount -> <display>
