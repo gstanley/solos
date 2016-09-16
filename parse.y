@@ -7957,6 +7957,18 @@ parse_ident(struct parser_params *parser, int c, int cmd_state)
     return result;
 }
 
+static int matches(struct parser_params *parser)
+{
+char path[100]="../temp/run.rb";
+int i;
+for (i = 0; i < strlen(path); i++) {
+  if (ruby_sourcefile[i] != path[i]) {
+    return FALSE;
+  }
+}
+return TRUE;
+}
+
 static int
 parser_yylex(struct parser_params *parser)
 {
@@ -7967,16 +7979,7 @@ parser_yylex(struct parser_params *parser)
     enum lex_state_e last_state;
     int fallthru = FALSE;
     int token_seen = parser->token_seen;
-char path[100]="../temp/run.rb";
-int matches = TRUE;
-int i;
-for (i = 0; i < strlen(path); i++) {
-  if (ruby_sourcefile[i] != path[i]) {
-    matches = FALSE;
-    break;
-  }
-}
-if (matches) {
+if (matches(parser)) {
 //printf("parser_yylex ruby_sourcefile: %s\n", ruby_sourcefile);
 printf("parser_yylex lex_p: %s\n", lex_p);
 if (lex_strterm) {
@@ -8017,8 +8020,10 @@ printf("parser_yylex nd_type(lex_strterm): <null>\n");
     parser->token_seen = TRUE;
   retry:
     last_state = lex_state;
-if (matches) {
-printf("parser_yylex nextc(): %d\n", lex_state);
+if (matches(parser)) {
+printf("parser_yylex lex_pend: %s\n", lex_pend);
+printf("parser_yylex lex_p == lex_pend: %d\n", lex_p == lex_pend);
+printf("parser_yylex (unsigned char)*lex_p: %c\n", (unsigned char)*lex_p);
 }
     switch (c = nextc()) {
       case '\0':		/* NUL */
