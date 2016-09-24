@@ -5,3 +5,12 @@
 - price * discountPercent / 100 -> discount
 - price - discount -> discountPrice
 - discount -> <display>
+** fib
+*** entry
+- l:0|w:n|c:1-10
+- l:1|w:f
+- l:2|w:f0
+- l:3|w:f1
+*** n > 1
+- l:4|r:n|c:5-8
+*** n <= 1
