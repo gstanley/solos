@@ -53,8 +53,17 @@ def path_exists_without_write?(start_line, end_line, variable)
 end
 
 def control_dep?(controller_line, target_line)
-  $controls.select {|con| con[:target] == target_line}.map {|con| con[:controller]}.drop_while {|con| con == controller_line}.empty? &&
   $controls.any? {|con| con[:controller] == controller_line && con[:target] == target_line}
 end
 
-# parse spec
+def set_values_from_spec(spec)
+  spec.split("|").each do |spec_part|
+  end
+end
+
+def value_goes_to(line, var)
+end
+
+def value_comes_from(line, var)
+end
+
