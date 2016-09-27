@@ -1,8 +1,11 @@
+require "strscan"
+
 $writes = []
 $reads = []
 $controls = []
 $follows = []
 $lines = []
+$current_line = 1
 
 def write(line, name)
   $writes << {line: line, name: name}
@@ -56,9 +59,55 @@ def control_dep?(controller_line, target_line)
   $controls.any? {|con| con[:controller] == controller_line && con[:target] == target_line}
 end
 
-def set_values_from_spec(spec)
-  spec.split("|").each do |spec_part|
+def parse_values_from_spec(spec)
+  result = {}
+  s = StringScanner.new(spec)
+  while !s.eos?
+    type = s.scan(/[lwrcfs]/)
+    s.skip(/:/)
+    content = ""
+    while !s.eos? && !s.match?(/\|[lwrcfs]:/)
+      content << s.getch
+    end
+    s.skip(/\|/) unless s.eos?
+
+    case type
+    when 'l'
+      result[:line] = content.to_i
+    when 'w'
+      result[:write] = content
+    when 'r'
+      result[:read] = content
+    when 'c'
+      content = eval("[#{content}]").map {|elem| Range === elem ? elem.map {|n| n} : elem}.flatten
+      result[:control] = content
+    when 'f'
+      content = eval("[#{content}]").map {|elem| Range === elem ? elem.map {|n| n} : elem}.flatten
+      result[:follow] = content
+    when 's'
+      result[:source] = content
+    end
   end
+
+  result
+end
+
+def set_values_from_spec(spec)
+  values = parse_values_from_spec(spec)
+  if values[:line]
+    $current_line = values[:line]
+  end
+  write($current_line, values[:write]) if values[:write]
+  read($current_line, values[:read]) if values[:read]
+  if values[:control]
+    values[:control].each {|c| control($current_line, c)}
+  end
+  if values[:follow]
+    values[:follow].each {|f| follow($current_line, f)}
+  end
+  source($current_line, values[:source]) if values[:source]
+
+  $current_line += 1
 end
 
 def value_goes_to(line, var)
