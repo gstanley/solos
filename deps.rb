@@ -116,3 +116,15 @@ end
 def value_comes_from(line, var)
 end
 
+if __FILE__ == $0
+  # run like: ruby deps.rb -- --test
+  if ARGV[1] == "--test"
+    require 'test/unit'
+
+    class TestDeps < Test::Unit::TestCase
+      def test_fail
+        flunk "not implemented"
+      end
+    end
+  end
+end
