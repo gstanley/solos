@@ -1,4 +1,5 @@
 require "strscan"
+require "byebug"
 
 $writes = []
 $reads = []
@@ -44,13 +45,17 @@ def controller_writes_target_for_variable?(controller_line, target_line, variabl
 end
 
 def path_exists_without_write?(start_line, end_line, variable)
-  $follows.select {|fol| fol[:line] == start_line}.any? do |fol|
-    if $writes.any? {|w| w[:line] == start_line && w[:name] == variable}
-      false
-    elsif fol[:pnext] != end_line
-      path_exists_without_write?(fol[:pnext], end_line, variable)
-    else
-      true
+  if start_line == end_line
+    true
+  else
+    $follows.select {|fol| fol[:line] == start_line}.any? do |fol|
+      if $writes.any? {|w| w[:line] == start_line && w[:name] == variable}
+        false
+      elsif fol[:pnext] != end_line
+        path_exists_without_write?(fol[:pnext], end_line, variable)
+      else
+        true
+      end
     end
   end
 end
@@ -122,8 +127,15 @@ if __FILE__ == $0
     require 'test/unit'
 
     class TestDeps < Test::Unit::TestCase
-      def test_fail
-        flunk "not implemented"
+      def test_with_irrelevant_line
+        set_values_from_spec "l:0|f:1|c:1..4"
+        set_values_from_spec "s:input x|w:x|f:2"
+        set_values_from_spec "s:y = 0|w:y|f:3"
+        set_values_from_spec "s:x = y|w:x|r:y|f:4"
+        set_values_from_spec "s:print \"x = \" + x|r:x|f:5"
+
+        assert !data_dep?(1, 4)
+        assert data_dep?(3, 4)
       end
     end
   end
