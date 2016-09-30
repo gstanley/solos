@@ -6,6 +6,7 @@ $reads = []
 $controls = []
 $follows = []
 $lines = []
+$source_lines = []
 $current_line = 1
 
 def write(line, name)
@@ -25,7 +26,8 @@ def follow(line, pnext)
 end
 
 def source(line, text)
-  $lines << {line: line, text: text}
+  $lines << line
+  $source_lines << {line: line, text: text}
 end
 
 def data_dep?(controller_line, target_line)
@@ -116,9 +118,15 @@ def set_values_from_spec(spec)
 end
 
 def value_goes_to(line, var)
+  $lines.reject {|l| l == line}.select do |l|
+    data_dep_for_variable?(line, l, var)
+  end
 end
 
 def value_comes_from(line, var)
+  $lines.reject {|l| l == line}.select do |l|
+    data_dep_for_variable?(l, line, var)
+  end
 end
 
 if __FILE__ == $0
