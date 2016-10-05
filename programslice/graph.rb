@@ -27,6 +27,23 @@ class Graph
 end
 
 class Edge
+  # Representing the edge of a :class:`graph`.
   def initialize(name, ln, column)
+    @name = name
+    @ln = ln
+    @column = column
+  end
+
+  def ==(other)
+    self.class == other.class && state == other.state
+  end
+
+  def hash
+    state.hash
+  end
+
+  protected
+  def state
+    [@name, @ln, @column]
   end
 end
