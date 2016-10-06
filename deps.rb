@@ -119,13 +119,15 @@ end
 
 def value_goes_to(line, var)
   $lines.reject {|l| l == line}.select do |l|
-    data_dep_for_variable?(line, l, var)
+    data_dep_for_variable?(line, l, var) ||
+    control_dep?(line, l)
   end
 end
 
 def value_comes_from(line, var)
   $lines.reject {|l| l == line}.select do |l|
-    data_dep_for_variable?(l, line, var)
+    data_dep_for_variable?(l, line, var) ||
+    control_dep?(l, line)
   end
 end
 
