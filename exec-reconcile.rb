@@ -16,6 +16,7 @@
 # - doc
 # - index terms (doc and keywords)
 # - missing info
+# - parse
 #
 # main exec takes a map with "source" => "..."
 # todo: search for instances of exec or art
@@ -31,6 +32,16 @@
 #   - replace line
 # - after line
 #   - show value of outputs/results
+# implement cutpoint helpers
+# - ruby
+# - javascript
+# - java
+# - clojure? (may be already integrated with exec functionality)
+#
+# merge params both ways
+# - artifacts specialize default parameters
+# - some default parameters are protected (artifacts don't change them)
+# - artifacts add to default lists
 
 def generate(artifact)
   artifact["source"]
