@@ -22,7 +22,11 @@
 # add exec with yaml (calls regular exec)
 # add exec with defaults (merges a default map)
 
-def exec(artifact)
+def generate(artifact)
+  artifact["source"]
+end
+
+def execute(artifact)
   eval artifact["source"]
 end
 
@@ -35,9 +39,14 @@ if __FILE__ == $0
       def setup
       end
 
-      def test_basic_exec
+      def test_basic_execute
         command = {"source" => "1 + 2 + 3"}
-        assert_equal 6, exec(command)
+        assert_equal 6, execute(command)
+      end
+
+      def test_basic_generate
+        command = {"source" => "1 + 2 + 3"}
+        assert_equal "1 + 2 + 3", generate(command)
       end
     end
   end
