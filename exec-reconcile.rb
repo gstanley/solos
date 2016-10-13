@@ -21,13 +21,27 @@
 # todo: search for instances of exec or art
 # add exec with yaml (calls regular exec)
 # add exec with defaults (merges a default map)
+# implement cutpoints
+# - before line
+#   - show location
+#   - show value of inputs/dependencies
+#     - or save value of inputs/dependencies
+#   - change value of inputs/dependencies
+# - at line
+#   - replace line
+# - after line
+#   - show value of outputs/results
 
 def generate(artifact)
   artifact["source"]
 end
 
 def execute(artifact)
-  eval artifact["source"]
+  eval generate(artifact)
+end
+
+def doc(artifact)
+  artifact["doc"]
 end
 
 if __FILE__ == $0
@@ -37,16 +51,20 @@ if __FILE__ == $0
 
     class TestExec < Test::Unit::TestCase
       def setup
+        @command1 = {"source" => "1 + 2 + 3",
+                     "doc" => "add 1, 2, 3"}
       end
 
-      def test_basic_execute
-        command = {"source" => "1 + 2 + 3"}
-        assert_equal 6, execute(command)
+      test "basic execute" do
+        assert_equal 6, execute(@command1)
       end
 
-      def test_basic_generate
-        command = {"source" => "1 + 2 + 3"}
-        assert_equal "1 + 2 + 3", generate(command)
+      test "basic generate" do
+        assert_equal "1 + 2 + 3", generate(@command1)
+      end
+
+      test "doc" do
+        assert_equal "add 1, 2, 3", doc(@command1)
       end
     end
   end
