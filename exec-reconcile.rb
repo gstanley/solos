@@ -22,6 +22,10 @@
 # add exec with yaml (calls regular exec)
 # add exec with defaults (merges a default map)
 
+def exec(artifact)
+  eval artifact["source"]
+end
+
 if __FILE__ == $0
   # run like: ruby exec-reconcile.rb -- --test
   if ARGV[1] == "--test"
@@ -31,8 +35,9 @@ if __FILE__ == $0
       def setup
       end
 
-      def test_example
-        flunk "start..."
+      def test_basic_exec
+        command = {"source" => "1 + 2 + 3"}
+        assert_equal 6, exec(command)
       end
     end
   end
