@@ -1,10 +1,10 @@
 # this is a reconcile of previous versions of art/exec
 # final goal is to merge back into another one of these systems
 # exec types:
-# - just exec
-# - exec with params
+# - *just exec
+# - *exec with params
 # - exec multiple times (w/ params)
-# - exec with deps
+# - *exec with deps
 # - exec with alternate dep
 #   - from value
 #   - from fixture
@@ -12,12 +12,13 @@
 #   - alternate function calls
 # - exec alternate (same language)
 # - exec with language specified
-# - generate
-# - doc
+# - *generate
+# - *doc
 # - index terms (doc and keywords)
 # - missing info
 # - parse
 # - char tests?
+# - exec with value trace
 #
 # main exec takes a map with "source" => "..."
 # todo: search for instances of exec or art
@@ -48,9 +49,12 @@
 # - artifacts add to default lists
 
 require "erb"
+require "ostruct"
 
 def generate(artifact)
-  ERB.new(artifact["source"], nil, '-').result(binding)
+  p = OpenStruct.new(artifact["params"])
+  b = binding
+  ERB.new(artifact["source"], nil, '-').result(b)
 end
 
 def execute(artifact)
@@ -91,6 +95,13 @@ if __FILE__ == $0
 
       test "execute generated code from template" do
         assert_equal 23, execute({"source" => "<%= 23 %>"})
+      end
+
+      test "generate and execute code with params" do
+        art = {"source" => '"Hello <%= p.a %>"',
+               "params" => {"a" => "Bob"}}
+        assert_equal '"Hello Bob"', generate(art)
+        assert_equal "Hello Bob", execute(art)
       end
     end
   end
