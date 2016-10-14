@@ -17,11 +17,15 @@
 # - index terms (doc and keywords)
 # - missing info
 # - parse
+# - char tests?
 #
 # main exec takes a map with "source" => "..."
 # todo: search for instances of exec or art
 # add exec with yaml (calls regular exec)
 # add exec with defaults (merges a default map)
+# emacs helpers
+# - xiki?
+# - org-babel helpers
 # implement cutpoints
 # - before line
 #   - show location
@@ -43,12 +47,15 @@
 # - some default parameters are protected (artifacts don't change them)
 # - artifacts add to default lists
 
+require "erb"
+
 def generate(artifact)
-  artifact["source"]
+  ERB.new(artifact["source"], nil, '-').result(binding)
 end
 
 def execute(artifact)
-  eval generate(artifact)
+  code = [artifact["dep"].to_s, generate(artifact)].join("\n")
+  eval code
 end
 
 def doc(artifact)
@@ -62,20 +69,28 @@ if __FILE__ == $0
 
     class TestExec < Test::Unit::TestCase
       def setup
-        @command1 = {"source" => "1 + 2 + 3",
-                     "doc" => "add 1, 2, 3"}
       end
 
       test "basic execute" do
-        assert_equal 6, execute(@command1)
+        assert_equal 3, execute({"source" => "1 + 2"})
       end
 
       test "basic generate" do
-        assert_equal "1 + 2 + 3", generate(@command1)
+        assert_equal "1 + 2 + 3", generate({"source" => "1 + 2 + 3"})
       end
 
       test "doc" do
-        assert_equal "add 1, 2, 3", doc(@command1)
+        assert_equal "add 1, 2, 3", doc({"source" => "1 + 2 + 3",
+                                         "doc" => "add 1, 2, 3"})
+      end
+
+      test "execute with dep" do
+        assert_equal 100, execute({"source" => "a * a",
+                                   "dep" => "a = 10"})
+      end
+
+      test "execute generated code from template" do
+        assert_equal 23, execute({"source" => "<%= 23 %>"})
       end
     end
   end
