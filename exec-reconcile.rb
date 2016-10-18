@@ -103,6 +103,15 @@ if __FILE__ == $0
         assert_equal '"Hello Bob"', generate(art)
         assert_equal "Hello Bob", execute(art)
       end
+
+      test "execute code that outputs to console" do
+        art = {"source" => <<EOS,
+puts "Hello <%= p.name %>"
+23
+EOS
+               "params" => {"name" => "Carol"}}
+        assert_equal "Hello Carol", execute(art)
+      end
     end
   end
 end
