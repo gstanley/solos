@@ -57,9 +57,35 @@ def generate(artifact)
   ERB.new(artifact["source"], nil, '-').result(b)
 end
 
+def wrap_code(code, wrappers)
+  if wrappers.nil? || wrappers.empty?
+    code
+  else
+    wrapper = wrappers.first
+    pre = wrapper["pre"] || ""
+    post = wrapper["post"] || ""
+    new_code = code
+#    if wrapper["pre"]
+#      new_code = [wrapper["pre"], 
+  end
+end
+
+def surrounding_code(wrappers)
+  result = [["require \"ostruct\"", ""],
+            ["___result = OpenStruct.new", ""]]
+
+  result
+end
+
+def split_last_expression_and_previous(code)
+  lines = code.chomp.split("\n")
+  [lines[0..-2].join, lines.last]
+end
+
 def execute(artifact)
-  code = [artifact["dep"].to_s, generate(artifact)].join("\n")
-  eval code
+  code = wrap_code([artifact["dep"].to_s, generate(artifact)].join("\n"), artifact["wrappers"])
+  result = eval code
+  result
 end
 
 def doc(artifact)
@@ -70,12 +96,14 @@ if __FILE__ == $0
   # run like: ruby exec-reconcile.rb -- --test
   if ARGV[1] == "--test"
     require 'test/unit'
+    require 'byebug'
 
     class TestExec < Test::Unit::TestCase
       def setup
       end
 
       test "basic execute" do
+debugger
         assert_equal 3, execute({"source" => "1 + 2"})
       end
 
@@ -104,14 +132,57 @@ if __FILE__ == $0
         assert_equal "Hello Bob", execute(art)
       end
 
-      test "execute code that outputs to console" do
-        art = {"source" => <<EOS,
-puts "Hello <%= p.name %>"
-23
-EOS
-               "params" => {"name" => "Carol"}}
-        assert_equal "Hello Carol", execute(art)
+      # uses "wrappers" which is general custom before/after code
+      # dependencies and executors are types of wrappers
+      # pre: code added before
+      # sensors: results brought outside
+      test "execute w/ dependencies" do
+        art = {"source" => "b = a",
+               "wrappers" => [
+                 {"pre" => "a = 10"},
+                 {"sensors" => "b"}]}
+        assert_equal 10, execute(art).b
       end
+
+      test "split last expression and previous" do
+        code = <<END
+a = 23
+a
+END
+        result = split_last_expression_and_previous(code)
+        assert_equal "a = 23", result[0]
+        assert_equal "a", result[1]
+      end
+#      test "execute code that outputs to console" do
+#        art = {"source" => <<EOS,
+#puts "Hello <%= p.name %>"
+#23
+#EOS
+#               "params" => {"name" => "Carol"}}
+#        assert_equal "Hello Carol", execute(art)
+#      end
     end
   end
 end
+# * wrapped
+# require "ostruct"
+# ___result = OpenStruct.new
+# a = 10
+# ___result["<result>"] = (
+# b = a
+# )
+# ___result["b"] = b
+#
+# 'b = a' #code
+# '___result["<result>"] = (', code, ')' #store_result
+# a = 10 #pre
+# nil #post
+# pre, store_result, post #around_code
+# --- could be more around_code blocks
+# ___result = OpenStruct.new #create_result
+# create_result, around_code, nil #code_with_result_store
+# ___result["b"] = b #sensor
+# --- could be more sensors
+# nil, code_with_result_store, sensor #code_with_sensors
+# require "ostruct" #require_for_openstruct
+# require_for_openstruct, code_with_sensors, nil #wrapped_code
