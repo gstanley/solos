@@ -47,9 +47,30 @@
 # - artifacts specialize default parameters
 # - some default parameters are protected (artifacts don't change them)
 # - artifacts add to default lists
+#
+# add view(s) for execute results
 
 require "erb"
 require "ostruct"
+
+TEMPLATES = {
+  "/ruby/eval" => <<END
+require "ostruct"
+___result = OpenStruct.new
+<% p.statements[0..-2].each do |stmt| -%>
+<%= stmt %>
+<% end -%>
+___result["<result>"] = (
+<%= p.statements[-1] %>
+)
+<% p.sensors.each do |sensor| -%>
+___result["<%= sensor.name %>"] = <%= sensor.code %>
+<% end -%>
+___result
+END
+  }
+
+DEFAULT_PARAMS = {}
 
 def generate(artifact)
   p = OpenStruct.new(artifact["params"])
@@ -57,35 +78,71 @@ def generate(artifact)
   ERB.new(artifact["source"], nil, '-').result(b)
 end
 
-def wrap_code(code, wrappers)
-  if wrappers.nil? || wrappers.empty?
-    code
-  else
-    wrapper = wrappers.first
-    pre = wrapper["pre"] || ""
-    post = wrapper["post"] || ""
-    new_code = code
-#    if wrapper["pre"]
-#      new_code = [wrapper["pre"], 
+# def wrap_code(code, wrappers)
+#   if wrappers.nil? || wrappers.empty?
+#     code
+#   else
+#     wrapper = wrappers.first
+#     pre = wrapper["pre"] || ""
+#     post = wrapper["post"] || ""
+#     new_code = code
+# #    if wrapper["pre"]
+# #      new_code = [wrapper["pre"], 
+#   end
+# end
+
+# def surrounding_code(wrappers)
+#   result = [["require \"ostruct\"", ""],
+#             ["___result = OpenStruct.new", ""]]
+# 
+#   result
+# end
+
+# def split_last_expression_and_previous(code)
+#   lines = code.chomp.split("\n")
+#   [lines[0..-2].join, lines.last]
+# end
+
+def execute(artifact)
+  result = nil
+  build(artifact).each do |task|
+    result = execute_task(task)
+  end
+
+  result.to_h.keys == [:"<result>"] ? result[:"<result>"] : result 
+end
+
+def execute_task(task)
+  eval task["source"]
+end
+
+def build(tasks_or_artifact)
+  tasks = Array === tasks_or_artifact ? tasks_or_artifact : [tasks_or_artifact]
+  tasks.map do |task|
+#    wrap_code([task["dep"].to_s, generate(task)].join("\n"), task["wrappers"])
+    p = OpenStruct.new
+    p.statements = []
+    if task["deps"]
+      task["deps"].each {|dep| p.statements << dep}
+    end
+    p.statements += statements(generate(task))
+    p.sensors = []
+    if task["sensors"]
+      task["sensors"].each do |sensor|
+        p.sensors << if String === sensor
+          OpenStruct.new({"name" => sensor, "code" => sensor})
+        else
+          OpenStruct.new(sensor)
+        end
+      end
+    end
+    b = binding
+    {"source" => ERB.new(TEMPLATES["/ruby/eval"], nil, '-').result(b)}
   end
 end
 
-def surrounding_code(wrappers)
-  result = [["require \"ostruct\"", ""],
-            ["___result = OpenStruct.new", ""]]
-
-  result
-end
-
-def split_last_expression_and_previous(code)
-  lines = code.chomp.split("\n")
-  [lines[0..-2].join, lines.last]
-end
-
-def execute(artifact)
-  code = wrap_code([artifact["dep"].to_s, generate(artifact)].join("\n"), artifact["wrappers"])
-  result = eval code
-  result
+def statements(task)
+  task.split("\n")
 end
 
 def doc(artifact)
@@ -102,8 +159,34 @@ if __FILE__ == $0
       def setup
       end
 
+      test "basic build" do
+        assert_equal <<END, build({"source" => "1 + 2"})[0]["source"]
+require "ostruct"
+___result = OpenStruct.new
+___result["<result>"] = (
+1 + 2
+)
+___result
+END
+      end
+
+      test "build w/ dependencies" do
+        art = {"source" => "b = a",
+               "deps" => ["a = 10"],
+               "sensors" => ["b"]}
+        assert_equal <<END, build(art)[0]["source"]
+require "ostruct"
+___result = OpenStruct.new
+a = 10
+___result["<result>"] = (
+b = a
+)
+___result["b"] = b
+___result
+END
+      end
+
       test "basic execute" do
-debugger
         assert_equal 3, execute({"source" => "1 + 2"})
       end
 
@@ -118,7 +201,7 @@ debugger
 
       test "execute with dep" do
         assert_equal 100, execute({"source" => "a * a",
-                                   "dep" => "a = 10"})
+                                   "deps" => ["a = 10"]})
       end
 
       test "execute generated code from template" do
@@ -138,18 +221,17 @@ debugger
       # sensors: results brought outside
       test "execute w/ dependencies" do
         art = {"source" => "b = a",
-               "wrappers" => [
-                 {"pre" => "a = 10"},
-                 {"sensors" => "b"}]}
+               "deps" => ["a = 10"],
+               "sensors" => ["b"]}
         assert_equal 10, execute(art).b
       end
 
-      test "split last expression and previous" do
+      test "statements" do
         code = <<END
 a = 23
 a
 END
-        result = split_last_expression_and_previous(code)
+        result = statements(code)
         assert_equal "a = 23", result[0]
         assert_equal "a", result[1]
       end
@@ -186,3 +268,13 @@ end
 # nil, code_with_result_store, sensor #code_with_sensors
 # require "ostruct" #require_for_openstruct
 # require_for_openstruct, code_with_sensors, nil #wrapped_code
+
+# - generate
+# - execute(tasks)
+#   - iterate over tasks
+#     - eval: eval task["code"]
+# - execute_task
+# - merge_params
+# - generate_task
+# - build
+# - expressions(code)
