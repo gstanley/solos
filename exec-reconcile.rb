@@ -149,6 +149,22 @@ def doc(artifact)
   artifact["doc"]
 end
 
+def capture
+  orig_stdout = $stdout.dup
+  orig_stderr = $stderr.dup
+  captured_stdout = StringIO.new
+  captured_stderr = StringIO.new
+  $stdout = captured_stdout
+  $stderr = captured_stderr
+  result = yield
+  captured_stdout.rewind
+  captured_stderr.rewind
+  return captured_stdout.string, captured_stderr.string, result
+ensure
+  $stdout = orig_stdout
+  $stderr = orig_stderr
+end
+
 if __FILE__ == $0
   # run like: ruby exec-reconcile.rb -- --test
   if ARGV[1] == "--test"
@@ -235,14 +251,15 @@ END
         assert_equal "a = 23", result[0]
         assert_equal "a", result[1]
       end
-#      test "execute code that outputs to console" do
-#        art = {"source" => <<EOS,
-#puts "Hello <%= p.name %>"
-#23
-#EOS
-#               "params" => {"name" => "Carol"}}
-#        assert_equal "Hello Carol", execute(art)
-#      end
+      test "execute code that outputs to console" do
+        art = {"source" => <<EOS,
+puts "Hello <%= p.name %>"
+23
+EOS
+               "params" => {"name" => "Carol"},
+               "sensors" => ["<out>"]}
+        assert_equal "Hello Carol\n", execute(art)["<out>"]
+      end
     end
   end
 end
