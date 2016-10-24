@@ -52,6 +52,16 @@
 
 require "erb"
 require "ostruct"
+$platform = case RUBY_PLATFORM
+when /cygwin|mswin|mingw|bccwin|wince|emx/
+  require "win32/open3"
+  :windows
+when /darwin/
+  :mac
+else
+  require "open4"
+  :linux
+end
 
 TEMPLATES = {
   "/ruby/eval" => <<END
@@ -60,11 +70,17 @@ ___result = OpenStruct.new
 <% p.statements[0..-2].each do |stmt| -%>
 <%= stmt %>
 <% end -%>
-___result["<result>"] = (
+___o, ___e, ___result["<res>"] = capture do
 <%= p.statements[-1] %>
-)
+end
 <% p.sensors.each do |sensor| -%>
+<% if sensor.name == "<out>" -%>
+___result["<%= sensor.name %>"] = ___o
+<% elsif sensor.name == "<err>" -%>
+___result["<%= sensor.name %>"] = ___e
+<% else -%>
 ___result["<%= sensor.name %>"] = <%= sensor.code %>
+<% end -%>
 <% end -%>
 ___result
 END
@@ -78,38 +94,13 @@ def generate(artifact)
   ERB.new(artifact["source"], nil, '-').result(b)
 end
 
-# def wrap_code(code, wrappers)
-#   if wrappers.nil? || wrappers.empty?
-#     code
-#   else
-#     wrapper = wrappers.first
-#     pre = wrapper["pre"] || ""
-#     post = wrapper["post"] || ""
-#     new_code = code
-# #    if wrapper["pre"]
-# #      new_code = [wrapper["pre"], 
-#   end
-# end
-
-# def surrounding_code(wrappers)
-#   result = [["require \"ostruct\"", ""],
-#             ["___result = OpenStruct.new", ""]]
-# 
-#   result
-# end
-
-# def split_last_expression_and_previous(code)
-#   lines = code.chomp.split("\n")
-#   [lines[0..-2].join, lines.last]
-# end
-
 def execute(artifact)
   result = nil
   build(artifact).each do |task|
     result = execute_task(task)
   end
 
-  result.to_h.keys == [:"<result>"] ? result[:"<result>"] : result 
+  result.to_h.keys == [:"<res>"] ? result[:"<res>"] : result 
 end
 
 def execute_task(task)
@@ -119,7 +110,6 @@ end
 def build(tasks_or_artifact)
   tasks = Array === tasks_or_artifact ? tasks_or_artifact : [tasks_or_artifact]
   tasks.map do |task|
-#    wrap_code([task["dep"].to_s, generate(task)].join("\n"), task["wrappers"])
     p = OpenStruct.new
     p.statements = []
     if task["deps"]
@@ -179,9 +169,9 @@ if __FILE__ == $0
         assert_equal <<END, build({"source" => "1 + 2"})[0]["source"]
 require "ostruct"
 ___result = OpenStruct.new
-___result["<result>"] = (
+___o, ___e, ___result["<res>"] = capture do
 1 + 2
-)
+end
 ___result
 END
       end
@@ -194,9 +184,9 @@ END
 require "ostruct"
 ___result = OpenStruct.new
 a = 10
-___result["<result>"] = (
+___o, ___e, ___result["<res>"] = capture do
 b = a
-)
+end
 ___result["b"] = b
 ___result
 END
@@ -252,6 +242,7 @@ END
         assert_equal "a", result[1]
       end
       test "execute code that outputs to console" do
+debugger
         art = {"source" => <<EOS,
 puts "Hello <%= p.name %>"
 23
