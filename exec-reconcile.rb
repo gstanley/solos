@@ -67,20 +67,23 @@ TEMPLATES = {
   "/ruby/eval" => <<END
 require "ostruct"
 ___result = OpenStruct.new
-<% p.statements[0..-2].each do |stmt| -%>
+___o, ___e, ___result["<res>"] = capture do
+___r = (
+<% p.statements.each do |stmt| -%>
 <%= stmt %>
 <% end -%>
-___o, ___e, ___result["<res>"] = capture do
-<%= p.statements[-1] %>
-end
+)
 <% p.sensors.each do |sensor| -%>
-<% if sensor.name == "<out>" -%>
-___result["<%= sensor.name %>"] = ___o
-<% elsif sensor.name == "<err>" -%>
-___result["<%= sensor.name %>"] = ___e
-<% else -%>
+<% if sensor.name != "<out>" && sensor.name != "<err>" -%>
 ___result["<%= sensor.name %>"] = <%= sensor.code %>
 <% end -%>
+<% end -%>
+___r
+end
+<% if p.sensors.find {|sensor| sensor.name == "<out>"} -%>
+___result["<out>"] = ___o
+<% elsif p.sensors.find {|sensor| sensor.name == "<err>"} -%>
+___result["<err>"] = ___e
 <% end -%>
 ___result
 END
@@ -170,7 +173,10 @@ if __FILE__ == $0
 require "ostruct"
 ___result = OpenStruct.new
 ___o, ___e, ___result["<res>"] = capture do
+___r = (
 1 + 2
+)
+___r
 end
 ___result
 END
@@ -183,11 +189,14 @@ END
         assert_equal <<END, build(art)[0]["source"]
 require "ostruct"
 ___result = OpenStruct.new
-a = 10
 ___o, ___e, ___result["<res>"] = capture do
+___r = (
+a = 10
 b = a
-end
+)
 ___result["b"] = b
+___r
+end
 ___result
 END
       end
@@ -242,7 +251,6 @@ END
         assert_equal "a", result[1]
       end
       test "execute code that outputs to console" do
-debugger
         art = {"source" => <<EOS,
 puts "Hello <%= p.name %>"
 23
