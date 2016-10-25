@@ -241,15 +241,6 @@ END
         assert_equal 10, execute(art).b
       end
 
-      test "statements" do
-        code = <<END
-a = 23
-a
-END
-        result = statements(code)
-        assert_equal "a = 23", result[0]
-        assert_equal "a", result[1]
-      end
       test "execute code that outputs to console" do
         art = {"source" => <<EOS,
 puts "Hello <%= p.name %>"
