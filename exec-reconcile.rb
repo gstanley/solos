@@ -110,8 +110,10 @@ def execute_task(task)
   eval task["source"]
 end
 
-def build(tasks_or_artifact)
-  tasks = Array === tasks_or_artifact ? tasks_or_artifact : [tasks_or_artifact]
+def build(artifact)
+  context = artifact["context"] || "/ruby/eval"
+  tasks = []
+  #Array === tasks_or_artifact ? tasks_or_artifact : [tasks_or_artifact]
   tasks.map do |task|
     p = OpenStruct.new
     p.statements = []
@@ -130,7 +132,7 @@ def build(tasks_or_artifact)
       end
     end
     b = binding
-    {"source" => ERB.new(TEMPLATES["/ruby/eval"], nil, '-').result(b)}
+    {"source" => ERB.new(task["template"]TEMPLATES[task["context"] || "/ruby/eval"], nil, '-').result(b)}
   end
 end
 
@@ -249,6 +251,17 @@ EOS
                "params" => {"name" => "Carol"},
                "sensors" => ["<out>"]}
         assert_equal "Hello Carol\n", execute(art)["<out>"]
+      end
+
+      test "execute ruby code from file" do
+        art = {"source" => <<EOS,
+puts "Hello there..."
+23
+EOS
+               "context" => "/ruby/script",
+               "sensors" => ["<out>"]}
+        assert_equal "Hello there...\n", execute(art)["<out>"]
+        assert_equal 23, execute(art)["<res>"]
       end
     end
   end
