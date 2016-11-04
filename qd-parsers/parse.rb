@@ -14,16 +14,26 @@ def parse_files(path)
   Find.find(path) do |f|
     next if FileTest.directory?(f)
     dir, file = File.split(f)
-    puts f
-    puts "=" * 40
-    contents = File.read(f)
     case File.extname(f)
     when ".rb"
+      puts f
+      puts "=" * 40
+      contents = File.read(f)
       puts RUBY_PARSER.parse(contents).text_value
+      puts "=" * 40
     when ".js"
+      puts f
+      puts "=" * 40
+      contents = File.read(f)
+      puts JAVASCRIPT_PARSER.parse(contents).text_value
+      puts "=" * 40
     when ".java"
+      puts f
+      puts "=" * 40
+      contents = File.read(f)
+      puts JAVA_PARSER.parse(contents).text_value
+      puts "=" * 40
     end
-    puts "=" * 40
   end
 end
 
