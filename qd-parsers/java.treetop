@@ -1,3 +1,6 @@
 grammar Java
+  rule program
+    .*
+  end
 end
 
