@@ -1,7 +1,17 @@
 * artifacts
 ** hello
 *** generate
+**** w/ params
 *** execute
+**** w/ params
 *** doc
 *** parse
 *** test
+* exemplars
+** issue command in shell
+-- running shell (bash, cmd...) w/ focus
+> ruby -v
+=> ruby 2.3.0p0 (2015-12-25 revision 53290) [i686-linux]
+*** note: '-- ' => prereq instruction
+*** note: '> ' => type text at prompt
+*** note: '=> ' => console output
