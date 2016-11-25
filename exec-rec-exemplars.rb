@@ -327,3 +327,51 @@ module Sudoku
     raise Impossible
   end
 end
+
+=begin
+* ---
+** outputs/effects
+*** sensors
+*** catch
+** procedures
+** logical constructs
+- business logic
+** data structures
+- parsers for string data
+** terms?
+** first?: git log |grep stanley => files/procs changed
+** dependencies
+** call graph
+*** entry points
+* qd exec patterns
+** doc
+** generate
+** exec expression
+*** no side effects/no dependencies
+*** sets variable
+*** dep on variable
+*** dep on proc (calls)
+*** define proc (like sets variable but for proc name)
+*** output
+**** console/stdout(,stderr)
+**** file
+**** socket
+**** env variable
+*** input
+**** console/stdin
+**** file
+**** socket
+**** random number
+**** date/time
+**** env variable
+**** command line arg
+*** throws exception
+*** dir/file operations
+*** process operations
+*** signal operations
+*** thread operations?
+*** http operations
+*** database operations
+** test
+** thor
+=end
