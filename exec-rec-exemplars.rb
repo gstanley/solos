@@ -328,6 +328,10 @@ module Sudoku
   end
 end
 
+def exec_simple(code)
+  eval(code)
+end
+
 =begin
 * ---
 ** outputs/effects
