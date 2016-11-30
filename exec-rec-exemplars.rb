@@ -341,6 +341,15 @@ def exec_set_var(code, var)
   __result__
 end
 
+def exec(code, var = nil)
+  __result__ = {}
+  b = binding
+  __result__["<res>"] = eval(code, b)
+  __result__[var] = b.eval(var) if var
+
+  __result__
+end
+
 =begin
 * ---
 ** outputs/effects
