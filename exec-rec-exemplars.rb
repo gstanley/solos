@@ -328,21 +328,12 @@ module Sudoku
   end
 end
 
-def exec_with_variable_dep(code, dep)
+def exec(code, vars = nil, deps = nil)
   __result__ = {}
-  b = binding
-  eval(dep, b)
-  __result__["<res>"] = eval(code, b)
-
-  __result__
-end
-
-def exec(code, var = nil, dep = nil)
-  __result__ = {}
-  b = binding
-  eval(dep, b) if dep
-  __result__["<res>"] = eval(code, b)
-  __result__[var] = b.eval(var) if var
+  __b__ = binding
+  [*deps].each {|dep| eval(dep, __b__)}
+  __result__["<res>"] = eval(code, __b__)
+  [*vars].each {|var| __result__[var] = __b__.eval(var)}
 
   __result__
 end
