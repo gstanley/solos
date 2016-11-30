@@ -332,6 +332,15 @@ def exec_simple(code)
   eval(code)
 end
 
+def exec_set_var(code, var)
+  __result__ = {}
+  b = binding
+  eval(code, b)
+  __result__[var] = b.eval(var)
+
+  __result__
+end
+
 =begin
 * ---
 ** outputs/effects
@@ -351,8 +360,8 @@ end
 ** doc
 ** generate
 ** exec expression
-*** no side effects/no dependencies
-*** sets variable
+*** DONE no side effects/no dependencies
+*** DONE sets variable
 *** dep on variable
 *** dep on proc (calls)
 *** define proc (like sets variable but for proc name)
@@ -376,6 +385,15 @@ end
 *** thread operations?
 *** http operations
 *** database operations
+** exec for language
+** alternatives
+*** replace dep with constant
+*** replace dep with fixture get
+*** replace dep with random
+*** replace dep with next
+*** replace output with nop
+*** wrap dep with fixture set
+*** wrap with setup/teardown(|undo)
 ** test
 ** thor
 =end
