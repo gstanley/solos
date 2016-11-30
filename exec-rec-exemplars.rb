@@ -328,22 +328,19 @@ module Sudoku
   end
 end
 
-def exec_simple(code)
-  eval(code)
-end
-
-def exec_set_var(code, var)
+def exec_with_variable_dep(code, dep)
   __result__ = {}
   b = binding
-  eval(code, b)
-  __result__[var] = b.eval(var)
+  eval(dep, b)
+  __result__["<res>"] = eval(code, b)
 
   __result__
 end
 
-def exec(code, var = nil)
+def exec(code, var = nil, dep = nil)
   __result__ = {}
   b = binding
+  eval(dep, b) if dep
   __result__["<res>"] = eval(code, b)
   __result__[var] = b.eval(var) if var
 
@@ -371,7 +368,7 @@ end
 ** exec expression
 *** DONE no side effects/no dependencies
 *** DONE sets variable
-*** dep on variable
+*** DONE dep on variable
 *** dep on proc (calls)
 *** define proc (like sets variable but for proc name)
 *** output
