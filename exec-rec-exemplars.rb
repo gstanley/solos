@@ -328,6 +328,34 @@ module Sudoku
   end
 end
 
+def capture
+  orig_stdout = $stdout.dup
+  orig_stderr = $stderr.dup
+  captured_stdout = StringIO.new
+  captured_stderr = StringIO.new
+  $stdout = captured_stdout
+  $stderr = captured_stderr
+  result = yield
+  captured_stdout.rewind
+  captured_stderr.rewind
+  return captured_stdout.string, captured_stderr.string, result
+ensure
+  $stdout = orig_stdout
+  $stderr = orig_stderr
+end
+
+def exec_w_stdout(code, vars = nil, deps = nil)
+  __result = {}
+  __b = binding
+  [*deps].each {|dep| eval(dep, __b)}
+  __result["<out>"],
+  __result["<err>"],
+  __result["<res>"] = capture {eval(code, __b)}
+  [*vars].each {|var| __result[var] = __b.eval(var)}
+
+  __result
+end
+
 def exec(code, vars = nil, deps = nil)
   __result__ = {}
   __b__ = binding
@@ -360,10 +388,10 @@ end
 *** DONE no side effects/no dependencies
 *** DONE sets variable
 *** DONE dep on variable
-*** dep on proc (calls)
+*** DONE dep on proc (calls)
 *** define proc (like sets variable but for proc name)
 *** output (w/ sensor)
-**** console/stdout(,stderr)
+**** DONE console/stdout(,stderr)
 **** file
 **** socket
 **** env variable
