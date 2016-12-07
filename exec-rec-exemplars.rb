@@ -344,26 +344,19 @@ ensure
   $stderr = orig_stderr
 end
 
-def exec_w_stdout(code, vars = nil, deps = nil)
+def exec(__params)
+  __code = __params["code"]
+  __vars = __params["vars"]
+  __deps = __params["deps"]
   __result = {}
   __b = binding
-  [*deps].each {|dep| eval(dep, __b)}
+  [*__deps].each {|dep| eval(dep, __b)}
   __result["<out>"],
   __result["<err>"],
-  __result["<res>"] = capture {eval(code, __b)}
-  [*vars].each {|var| __result[var] = __b.eval(var)}
+  __result["<res>"] = capture {eval(__code, __b)}
+  [*__vars].each {|var| __result[var] = __b.eval(var)}
 
   __result
-end
-
-def exec(code, vars = nil, deps = nil)
-  __result__ = {}
-  __b__ = binding
-  [*deps].each {|dep| eval(dep, __b__)}
-  __result__["<res>"] = eval(code, __b__)
-  [*vars].each {|var| __result__[var] = __b__.eval(var)}
-
-  __result__
 end
 
 =begin
