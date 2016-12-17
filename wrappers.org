@@ -1,0 +1,11 @@
+* expr -> val
+* method() -> val
+* method(val) -> val
+* obj.method() -> val
+* obj.meth(val) -> val
+* ... -> sensor()
+* ... -> sense-var
+* ... -> obj.sensor()
+* setup/teardown
+* suture
+* save/undo
