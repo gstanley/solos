@@ -335,6 +335,11 @@ value_string = {
     "kw" => [],
     "cat" => []
   },
+  "parse-tree" => <<END
+children:
+- hello...
+type: :str
+END
 }
 
 def capture
@@ -378,6 +383,10 @@ end
 
 def categories(__params)
   __params["doc"]["cat"]
+end
+
+def parse_tree(__params)
+  YAML.load(__params["parse-tree"])
 end
 
 =begin
