@@ -359,6 +359,18 @@ def exec(__params)
   __result
 end
 
+def desc(__params)
+  __params["doc"]["desc"]
+end
+
+def keywords(__params)
+  __params["doc"]["kw"]
+end
+
+def categories(__params)
+  __params["doc"]["cat"]
+end
+
 =begin
 * ---
 ** outputs/effects
