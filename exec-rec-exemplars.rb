@@ -328,6 +328,15 @@ module Sudoku
   end
 end
 
+value_string = {
+  "code" => "\"hello...\"",
+  "doc" => {
+    "desc" => "string value",
+    "kw" => [],
+    "cat" => []
+  },
+}
+
 def capture
   orig_stdout = $stdout.dup
   orig_stderr = $stderr.dup
