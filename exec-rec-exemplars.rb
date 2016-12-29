@@ -1,4 +1,5 @@
 require "erb"
+require "yaml"
 
 # hello_gen
 "\"hello...\""
@@ -330,6 +331,8 @@ end
 
 value_string = {
   "code" => "\"hello...\"",
+  "index" => 0,
+  "location" => "<in_src>",
   "doc" => {
     "desc" => "string value",
     "kw" => [],
