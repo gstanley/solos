@@ -339,9 +339,51 @@ value_string = {
     "cat" => []
   },
   "parse-tree" => <<END
+type: :str
 children:
 - hello...
-type: :str
+END
+}
+
+expr = {
+  "code" => "1 + 1",
+  "index" => 1,
+  "location" => "<in_src>",
+  "doc" => {
+    "desc" => "expression",
+    "kw" => [],
+    "cat" => []
+  },
+  "parse-tree" => <<END
+type: :send
+children:
+- type: :int
+  children:
+  - 1
+- :+
+- type: :int
+  children:
+  - 1
+END
+}
+
+value_string_with_console = {
+  "code" => "puts \"hello...\"",
+  "index" => 2,
+  "location" => "<in_src>",
+  "doc" => {
+    "desc" => "string value to console",
+    "kw" => [],
+    "cat" => []
+  },
+  "parse-tree" => <<END
+type: :send
+children:
+- 
+- :puts
+- type: :str
+  children:
+  - hello...
 END
 }
 
