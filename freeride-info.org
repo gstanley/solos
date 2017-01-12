@@ -2,9 +2,43 @@
 ** examples
 *** HelloWorld
 **** hello.rb
+***** MyFreeRIDELibrary
+****** HelloWorld
+******* MyHelloWorld
+******** self.start
+********* -> ?:initialize
+check if need to include
+********* -> ?:plugin
+check if need to include
+********* -> ?:[]
+check if need to include
+********* -> ?:manager
+check if need to include
+********* -> ?:add
+********* -> ?:say_hello
+********* -> ?:say_goodbye
+********* -> ?:add_command
+********* -> ?:transition
+******** HelloCommand
+********* initialize
+check if need to include
+********* say_hello
+********** -> ?:my_slot
+********** -> ?:[]
+********** -> ?:manager
+********** -> ?:command
+********** -> ?:invoke
+********* say_goodbye
+********** -> ?:my_slot
+********** -> ?:[]
+********** -> ?:manager
+********** -> ?:command
+********** -> ?:invoke
+********** -> ?:data
 ** freebase
 *** bin
 **** install.rb
+***** install_rb
 **** run.rb
 *** lib
 **** freebase
