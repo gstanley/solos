@@ -19,6 +19,10 @@ class Controller
   def show
 debugger
     calc = Calculator.new
+    # wrapper - before
+    # wrapper - call
+    calc.add(params[:left], params[:right])
+    # suture - call
     @result = Suture.create :add,
       old: calc.method(:add),
       args: [
@@ -26,6 +30,7 @@ debugger
         params[:right]
       ],
       record_calls: true
+    # wrapper - after
   end
 end
 
