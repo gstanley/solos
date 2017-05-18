@@ -1,4 +1,4 @@
-def test_combo(params, prefix = "")
+def test_combo(params, prefix = [])
   if params.empty?
     if prefix.empty?
       []
@@ -12,7 +12,8 @@ def test_combo(params, prefix = "")
     rest = params.dup
     rest.delete(first)
     values.each do |value|
-      result += test_combo(rest, "#{prefix}#{prefix.empty? ? "" : ";"}#{first}=#{value.to_s}")
+#      result += test_combo(rest, "#{prefix}#{prefix.empty? ? "" : ";"}#{first}=#{value.to_s}")
+      result += test_combo(rest, prefix + [[first, value]])
     end
     result
   end
