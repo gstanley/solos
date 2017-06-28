@@ -1,0 +1,12 @@
+* TracePoint debugging tools
+  :PROPERTIES:
+  :tangle:   yes
+  :END:
+#+BEGIN_SRC ruby
+  require 'rbtrace'
+  require 'suture'
+  require 'visual_call_trace'
+#+END_SRC
+* todo
+* rails tools
+* links
