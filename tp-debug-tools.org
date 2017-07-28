@@ -1,12 +1,140 @@
 * TracePoint debugging tools
+* todo
+** TODO use suture
+** TODO how did the program get here
+*** TODO most recently function call
+**** TODO show conditionally
+*** TODO entire stack
+**** TODO only once (end program or stop showing the call stack)
+**** TODO show conditionally
+** TODO where is a method defined
+*** TODO for current context
+*** TODO show source
+*** TODO super
+*** TODO if method method is implemented for the receiver
+** TODO what is being called (all the methods)
+** TODO show possible debugging session (guess at what to do)
+*** TODO select format
+*** TODO select minimal/verbose format
+*** TODO select what to show
+**** TODO return value
+**** TODO arguments
+***** TODO values
+**** TODO sensors
+***** TODO at start
+***** TODO at end
+** TODO where is an exception originally raised
+** TODO where was an object originally allocated
+** TODO what does an object/method depend on
+** TODO what is the history of an object
+** TODO where is an object being changed
+*** TODO where is a resource being changed (using sensors)
+** TODO where is a deadlock happening
+** TODO manually start looking for something
+** TODO open a gem (you can then add debugging statements)
+*** TODO revert your changes
+** TODO list methods on an object
+** TODO show argument names for a method (and argument info)
+** TODO where does an object change (by assignment)
+- compare the object id at call and return
+   - may not show if object is reassigned the same object
+   - may not show an object being changed more than once
+** TODO custom caller
+*** DONE remove pry lines
+*** DONE remove rspec lines
+*** TODO convert to map
+** TODO create a call graph
+** TODO parse into ast
+* tools
   :PROPERTIES:
   :tangle:   yes
   :END:
+** setup
 #+BEGIN_SRC ruby
   require 'rbtrace'
   require 'suture'
-  require 'visual_call_trace'
+  require 'visual_call_graph'
+  require 'rails'
+  require 'parser/current'
+
+  GEM_LOC = ENV['GEM_HOME']
+  RAILS_APP_ROOT = Rails.root.to_s
 #+END_SRC
-* todo
+** custom caller
+#+BEGIN_SRC ruby
+  def custom_caller
+    caller.select do |line|
+      line !~ /^#{GEM_LOC}\/gems\/pry-/ &&
+      line !~ /^#{GEM_LOC}\/gems\/rspec-/ &&
+      line !~ /^#{GEM_LOC}\/gems\/bundler-/ &&
+      line !~ /^\(pry\)/ &&
+      line !~ /bin\/rspec/ &&
+      line !~ /bin\/bundle/
+    end.map do |line|
+      result = {}
+      type = :app
+      scan_line = StringScanner.new(line)
+      if scan_line.scan(/#{gem_loc}\/gems\//)
+        type = :gem
+        result[:name] = scan_line.scan(/[^\/]+/)
+        scan_line.scan(/\//)
+        result[:file] = scan_line.scan(/[^:]+/)
+        scan_line.scan(/:/)
+        result[:line] = scan_line.scan(/[^:]+/).to_i
+        scan_line.scan(/:in `/)
+        result[:method] = scan_line.scan(/[^']+/)
+      elsif scan_line.scan(/#{gem_bin_loc}\//)
+        type = :gem_executable
+        result[:program] = scan_line.scan(/[^:]+/)
+        scan_line.scan(/:/)
+        result[:line] = scan_line.scan(/[^:]+/).to_i
+        scan_line.scan(/:in `/)
+        result[:method] = scan_line.scan(/[^']+/)
+      end
+      result[:type] = type
+
+      result
+    end
+  end
+#+END_SRC
+** gem location
+#+BEGIN_SRC ruby
+  def gem_loc
+    env = `gem env`.split("\n")
+    env.find do |line|
+      /- INSTALLATION DIRECTORY/ =~ line
+    end.split(": ")[-1]
+  end
+
+  def gem_bin_loc
+    env = `gem env`.split("\n")
+    env.find do |line|
+      /- EXECUTABLE DIRECTORY/ =~ line
+    end.split(": ")[-1]
+  end
+#+END_SRC
+** gather ruby info
+#+BEGIN_SRC ruby
+  def gather(source)
+    results = {}
+    top_node = Parser::CurrentRuby.parse(source)
+    results = gather_child_info(top_node, results)
+
+    results
+  end
+
+  def gather_child_info(node, results)
+  end
+#+END_SRC
 * rails tools
 * links
+** [[http://www.blackbytes.info/2017/01/spy-on-your-ruby-methods/][How To Spy on Your Ruby Methods]]
+** [[https://www.slideshare.net/markykang/mangling-ruby-withtracepoint][Mangling Ruby with TracePoint]]
+** [[https://matt.aimonetti.net/posts/2013/03/05/inspecting-rails-4-request-dispatch-using-ruby-2-dot-0/][Inspecting Rails 4 Using Ruby 2.0]]
+** [[http://jdabbs.com/tracepoint-by-example][TracePoint by Example]]
+** [[https://www.sitepoint.com/digging-tracepoint/][Digging with TracePoint]]
+** [[http://crypt.codemancers.com/posts/2015-04-15-diy-ruby-cpu-profiling-part-iii/][DIY Ruby CPU profiling - Part III]]
+** [[http://blog.honeybadger.io/using-tracepoint-to-explore-complex-exception-behavior-in-ruby/][Using TracePoint to explore complex exception behavior in Ruby]]
+** [[https://tenderlovemaking.com/2016/02/05/i-am-a-puts-debuggerer.html][I am a puts debuggerer]]
+** [[https://www.schneems.com/2016/01/25/ruby-debugging-magic-cheat-sheet.html][Ruby Debugging Magic Cheat Sheet]]
+** [[https://stackoverflow.com/questions/9211813/is-there-a-way-to-access-method-arguments-in-ruby][Is there a way to access method arguments in Ruby?]]
