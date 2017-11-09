@@ -64,7 +64,6 @@ class TestXForm < Test::Unit::TestCase
   end
 
   test "replace with escaped ." do
-    binding.pry
     assert_equal ['.'], xform(['a'], ["./\\."])
   end
 
